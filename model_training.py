@@ -179,12 +179,9 @@ def train_and_persist_model(random_state: int = RANDOM_STATE) -> dict:
     dict  Full model report (mirrored in model_report.json).
     """
     # ── Load / preprocess data ────────────────────────────────────────────────
-    if not CLEAN_DATA_PATH.exists():
-        print("Clean data not found – running preprocessing pipeline first…\n")
-        df = run_preprocessing_pipeline()
-    else:
-        df = pd.read_csv(CLEAN_DATA_PATH)
-        print(f"Loaded clean data: {len(df)} rows from '{CLEAN_DATA_PATH}'")
+    print("Running preprocessing pipeline from enriched input…\n")
+    df = run_preprocessing_pipeline()
+    print(f"Loaded clean data: {len(df)} rows from '{CLEAN_DATA_PATH}'")
 
     y = df[TARGET_COLUMN]
     all_results: list[dict] = []

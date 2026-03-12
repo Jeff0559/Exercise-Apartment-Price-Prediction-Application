@@ -1,7 +1,7 @@
 """
 Generates realistic synthetic apartment listing data for the Zurich area.
 
-Run this script once to create data/apartments_zurich_raw.csv, which serves
+Run this script once to create data/apartments_data_enriched_with_new_features.csv, which serves
 as the input for the full preprocessing and modelling pipeline.
 
 Usage:
@@ -277,7 +277,7 @@ def generate_dataset(n: int = N_SAMPLES) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    output_path = Path("data/apartments_zurich_raw.csv")
+    output_path = Path("data/apartments_data_enriched_with_new_features.csv")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     df = generate_dataset(n=N_SAMPLES)

@@ -12,7 +12,8 @@ IMPORTANT NOTES
   actual HTML of the portal you intend to scrape.
 * If scraping is not immediately possible, run
       python generate_sample_data.py
-  to create a realistic synthetic dataset at data/apartments_zurich_raw.csv
+    to create a realistic synthetic dataset at
+    data/apartments_data_enriched_with_new_features.csv
   that the rest of the pipeline can use without modification.
 
 Usage
@@ -43,7 +44,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-RAW_DATA_PATH = Path("data/apartments_zurich_raw.csv")
+RAW_DATA_PATH = Path("data/apartments_data_enriched_with_new_features.csv")
 BASE_URL      = "https://www.homegate.ch/rent/real-estate/city-zurich/matching-list"
 REQUEST_DELAY = 2.5   # seconds between requests – be a polite crawler
 MAX_PAGES     = 50    # maximum number of search-result pages to scrape

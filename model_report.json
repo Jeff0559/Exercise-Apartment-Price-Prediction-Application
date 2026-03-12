@@ -1,36 +1,33 @@
 {
   "best_model": {
     "iteration": "Iteration 2 – Extended",
-    "model_name": "GradientBoostingRegressor",
+    "model_name": "RandomForestRegressor",
     "hyperparameters": {
-      "alpha": 0.9,
+      "bootstrap": true,
       "ccp_alpha": 0.0,
-      "criterion": "friedman_mse",
-      "init": null,
-      "learning_rate": 0.08,
-      "loss": "squared_error",
-      "max_depth": 5,
-      "max_features": null,
+      "criterion": "squared_error",
+      "max_depth": 12,
+      "max_features": 1.0,
       "max_leaf_nodes": null,
+      "max_samples": null,
       "min_impurity_decrease": 0.0,
-      "min_samples_leaf": 4,
+      "min_samples_leaf": 3,
       "min_samples_split": 2,
       "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
       "n_estimators": 200,
-      "n_iter_no_change": null,
+      "n_jobs": null,
+      "oob_score": false,
       "random_state": 42,
-      "subsample": 0.8,
-      "tol": 0.0001,
-      "validation_fraction": 0.1,
       "verbose": 0,
       "warm_start": false
     },
-    "rmse_mean": 288.2767641635681,
-    "rmse_std": 11.932260342138772,
-    "mae_mean": 207.6480778248051,
-    "mae_std": 9.99111413969886,
-    "r2_mean": 0.888941432585692,
-    "r2_std": 0.013579870007312613,
+    "rmse_mean": 496.193158089393,
+    "rmse_std": 31.438499162277644,
+    "mae_mean": 354.46444559792343,
+    "mae_std": 16.390703078757628,
+    "r2_mean": 0.6540960592813627,
+    "r2_std": 0.054894239699872574,
     "features": [
       "apartment_size_sqm",
       "number_of_rooms",
@@ -51,12 +48,12 @@
         "positive": false,
         "tol": 1e-06
       },
-      "rmse_mean": 417.4946881618938,
-      "rmse_std": 14.956128224384226,
-      "mae_mean": 335.32219229982195,
-      "mae_std": 11.865843149991655,
-      "r2_mean": 0.7685192552748893,
-      "r2_std": 0.008739085512035775
+      "rmse_mean": 690.5660318723618,
+      "rmse_std": 31.50913134857831,
+      "mae_mean": 531.3453590949312,
+      "mae_std": 22.674642886528975,
+      "r2_mean": 0.33289049520273173,
+      "r2_std": 0.07474984365659079
     },
     {
       "iteration": "Iteration 1 – Baseline",
@@ -81,12 +78,12 @@
         "verbose": 0,
         "warm_start": false
       },
-      "rmse_mean": 452.8624459289464,
-      "rmse_std": 16.405526178188403,
-      "mae_mean": 362.10854696713255,
-      "mae_std": 17.015395486849336,
-      "r2_mean": 0.7272574177437059,
-      "r2_std": 0.01760171118332001
+      "rmse_mean": 683.3154777347679,
+      "rmse_std": 26.855150914557345,
+      "mae_mean": 515.5181429696563,
+      "mae_std": 13.110194600123512,
+      "r2_mean": 0.3453790691299382,
+      "r2_std": 0.08378561853925275
     },
     {
       "iteration": "Iteration 2 – Extended",
@@ -98,12 +95,12 @@
         "positive": false,
         "tol": 1e-06
       },
-      "rmse_mean": 312.46092890072504,
-      "rmse_std": 17.022919203513542,
-      "mae_mean": 245.24843583712618,
-      "mae_std": 16.314650226436356,
-      "r2_mean": 0.8695323317769876,
-      "r2_std": 0.017239511322568603
+      "rmse_mean": 571.3633663808281,
+      "rmse_std": 30.76541001133592,
+      "mae_mean": 423.614557741955,
+      "mae_std": 23.32125574030425,
+      "r2_mean": 0.5417654874189148,
+      "r2_std": 0.06547990549622752
     },
     {
       "iteration": "Iteration 2 – Extended",
@@ -128,12 +125,12 @@
         "verbose": 0,
         "warm_start": false
       },
-      "rmse_mean": 298.1736402900278,
-      "rmse_std": 16.306524370105613,
-      "mae_mean": 218.06239022216673,
-      "mae_std": 11.924260523064085,
-      "r2_mean": 0.8810998450580605,
-      "r2_std": 0.016360698156150155
+      "rmse_mean": 496.193158089393,
+      "rmse_std": 31.438499162277644,
+      "mae_mean": 354.46444559792343,
+      "mae_std": 16.390703078757628,
+      "r2_mean": 0.6540960592813627,
+      "r2_std": 0.054894239699872574
     },
     {
       "iteration": "Iteration 2 – Extended",
@@ -161,15 +158,15 @@
         "verbose": 0,
         "warm_start": false
       },
-      "rmse_mean": 288.2767641635681,
-      "rmse_std": 11.932260342138772,
-      "mae_mean": 207.6480778248051,
-      "mae_std": 9.99111413969886,
-      "r2_mean": 0.888941432585692,
-      "r2_std": 0.013579870007312613
+      "rmse_mean": 515.8011723995565,
+      "rmse_std": 25.589003261109763,
+      "mae_mean": 360.0008901756363,
+      "mae_std": 13.984027545619556,
+      "r2_mean": 0.6271844336490122,
+      "r2_std": 0.04985026437469406
     }
   ],
-  "n_training_samples": 630,
+  "n_training_samples": 772,
   "target_column": "price_chf",
   "random_state": 42
 }

@@ -32,8 +32,8 @@ Key components:
 ```
 apartment-price-prediction/
 ├── data/
-│   ├── apartments_zurich_raw.csv       # raw listings (700 rows)
-│   └── apartments_zurich_clean.csv     # preprocessed (630 rows)
+│   ├── apartments_data_enriched_with_new_features.csv  # enriched input dataset
+│   └── apartments_enriched_clean.csv   # preprocessed output
 ├── notebooks/
 │   └── apartment_price_prediction.ipynb
 ├── scraper.py
@@ -63,7 +63,7 @@ Run to regenerate:
 python generate_sample_data.py
 ```
 
-### Dataset Schema (`data/apartments_zurich_raw.csv`)
+### Dataset Schema (`data/apartments_data_enriched_with_new_features.csv`)
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -85,13 +85,36 @@ Dübendorf, Küsnacht and Winterthur.
 Price multipliers per municipality reflect observed market premiums – Zurich
 city centre commands up to 1.30× the base rate; outer suburbs 0.75–0.85×.
 
+### Using `apartments_data_enriched_with_new_features.csv`
+
+The preprocessing pipeline is now fully based on this enriched dataset:
+
+- Required input: `data/apartments_data_enriched_with_new_features.csv`
+
+To keep the downstream model and app unchanged, input columns are normalized
+to the project schema in `data_preprocessing.py`.
+
+| Enriched column | Project column |
+|-----------------|----------------|
+| `rooms` | `number_of_rooms` |
+| `area` | `apartment_size_sqm` |
+| `lat` | `latitude` |
+| `lon` | `longitude` |
+| `description_raw` | `description` |
+| `postalcode` | `zip_code` |
+| `town` | `city` |
+| `price` | `price_chf` |
+
+If `title` is missing, it is generated from text fields so keyword-based feature
+extraction (`WG`, `furnished`, `parking`) still works.
+
 ---
 
 ## Data Preprocessing
 
 All preprocessing logic lives in `data_preprocessing.py` and runs as a numbered pipeline:
 
-1. **Load raw CSV** – reads `data/apartments_zurich_raw.csv` and renames the `price` column to `price_chf`
+1. **Load CSV + normalize schema** – reads `data/apartments_data_enriched_with_new_features.csv` and maps external column names to the internal schema
 2. **Filter WG / shared-room listings** – removes entries where title or description contains keywords such as `wg`, `mitbewohner`, `shared room`; these are atypical price points that would distort the model
 3. **Filter invalid rows** – drops rows where `price_chf < 400 CHF`, `apartment_size_sqm < 15 m²`, or `number_of_rooms < 1`
 4. **Impute missing coordinates** – replaces missing `latitude` / `longitude` values with column medians, required for the distance feature
@@ -100,7 +123,7 @@ All preprocessing logic lives in `data_preprocessing.py` and runs as a numbered 
 7. **Extract `parking`** – binary feature from keyword search *(see engineered features)*
 8. **Compute `rooms_per_sqm`** – `number_of_rooms / apartment_size_sqm` *(see engineered features)*
 9. **Remove price outliers** – IQR method with multiplier = 2.0 on `price_chf`
-10. **Save** to `data/apartments_zurich_clean.csv`
+10. **Save** to `data/apartments_enriched_clean.csv`
 
 Result: **700 raw rows** → **630 clean rows** ready for modelling.
 
@@ -209,16 +232,18 @@ The best model (lowest RMSE) is fitted on the full dataset and persisted to `tra
 pip install -r requirements.txt
 ```
 
-### 2. Generate sample data (once)
+### 2. Ensure enriched data exists
 
-```bash
-python generate_sample_data.py
+Place your dataset at:
+
+```text
+data/apartments_data_enriched_with_new_features.csv
 ```
 
 ### 3. Run preprocessing and train models
 
 ```bash
-python data_preprocessing.py   # creates data/apartments_zurich_clean.csv
+python data_preprocessing.py   # creates data/apartments_enriched_clean.csv
 python model_training.py       # trains, evaluates, and saves the best model
 ```
 
@@ -248,14 +273,15 @@ Then navigate to `notebooks/apartment_price_prediction.ipynb`.
 
 ## Notes on Real Data
 
-To replace the synthetic dataset with real Zurich apartment data:
+To use your own real Zurich apartment data:
 
 1. Review the target portal's `robots.txt` and Terms of Service.
 2. Update the CSS selectors in `scraper.py` to match the current page structure.
-3. Run `python scraper.py` – output is saved to `data/apartments_zurich_raw.csv`.
+3. Export your dataset to `data/apartments_data_enriched_with_new_features.csv`.
 4. Re-run the preprocessing and training pipeline.
 
-The pipeline is designed to work without modification once `data/apartments_zurich_raw.csv` exists with the correct column schema.
+The pipeline is designed to work without modification once
+`data/apartments_data_enriched_with_new_features.csv` exists with the expected schema.
 
 ## How to Run the App
 
@@ -274,10 +300,10 @@ python model_training.py
 3. Start Streamlit:
 
 ```bash
-streamlit run app.py
+streamlit run streamlit_app.py
 ```
 
-If model files are missing, `app.py` will train and save a model automatically on first run.
+If model files are missing, `streamlit_app.py` will train and save a model automatically on first run.
 
 ## Notes for Assignment Submission
 

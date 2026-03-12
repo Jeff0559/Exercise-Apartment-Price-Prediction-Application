@@ -2,8 +2,9 @@
 Data Preprocessing Pipeline – Zurich Apartment Price Prediction
 ===============================================================
 Provides a modular, step-by-step cleaning and feature-engineering pipeline
-that transforms raw apartment listing data from data/apartments_zurich_raw.csv
-into a model-ready dataset saved to data/apartments_zurich_clean.csv.
+that transforms the enriched apartment listing data from
+data/apartments_data_enriched_with_new_features.csv into a model-ready
+dataset saved to data/apartments_enriched_clean.csv.
 
 Engineered features
 -------------------
@@ -22,8 +23,8 @@ import numpy as np
 import pandas as pd
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-RAW_DATA_PATH   = Path("data/apartments_zurich_raw.csv")
-CLEAN_DATA_PATH = Path("data/apartments_zurich_clean.csv")
+INPUT_DATA_PATH = Path("data/apartments_data_enriched_with_new_features.csv")
+CLEAN_DATA_PATH = Path("data/apartments_enriched_clean.csv")
 
 # ── Geographic constants ──────────────────────────────────────────────────────
 ZURICH_CENTER_LAT = 47.3769
@@ -52,17 +53,67 @@ EXTENDED_FEATURES = BASELINE_FEATURES + [
 
 # ── Step 1: Load ──────────────────────────────────────────────────────────────
 
-def load_raw_data(path: Path = RAW_DATA_PATH) -> pd.DataFrame:
-    """Loads raw apartment listing data from CSV and renames the price column."""
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Raw data not found at '{path}'. "
-            "Run 'python generate_sample_data.py' to create it, "
-            "or provide your own CSV with the required columns."
-        )
-    df = pd.read_csv(path)
+def _standardize_input_schema(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalizes external dataset schemas to the project's expected column names.
+
+    This keeps the downstream pipeline unchanged and supports both the original
+    assignment schema and enriched variants.
+    """
+    df = df.copy()
+
+    # Some exports contain an unnamed index column that should not be model input.
+    unnamed_cols = [c for c in df.columns if str(c).lower().startswith("unnamed:")]
+    if unnamed_cols:
+        df.drop(columns=unnamed_cols, inplace=True)
+
+    rename_map = {
+        "rooms": "number_of_rooms",
+        "area": "apartment_size_sqm",
+        "lat": "latitude",
+        "lon": "longitude",
+        "description_raw": "description",
+        "postalcode": "zip_code",
+        "town": "city",
+    }
+    df.rename(columns=rename_map, inplace=True)
+
     if "price" in df.columns and TARGET_COLUMN not in df.columns:
         df.rename(columns={"price": TARGET_COLUMN}, inplace=True)
+
+    if "title" not in df.columns:
+        if "description" in df.columns:
+            df["title"] = df["description"].fillna("").astype(str).str.slice(0, 120)
+        elif "address" in df.columns:
+            df["title"] = df["address"].fillna("").astype(str)
+        else:
+            df["title"] = ""
+
+    if "description" not in df.columns:
+        df["description"] = df["title"].fillna("").astype(str)
+
+    required = [TARGET_COLUMN, "number_of_rooms", "apartment_size_sqm", "latitude", "longitude"]
+    missing = [col for col in required if col not in df.columns]
+    if missing:
+        raise ValueError(
+            "Input CSV is missing required columns after schema mapping: "
+            f"{missing}. Available columns: {list(df.columns)}"
+        )
+
+    return df
+
+
+def load_raw_data(path: Path = INPUT_DATA_PATH) -> pd.DataFrame:
+    """Loads enriched apartment listing data from CSV and normalizes schema names."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Input data not found at '{path}'. "
+            "Provide 'data/apartments_data_enriched_with_new_features.csv' "
+            "with the required columns."
+        )
+
+    df = pd.read_csv(path)
+    df = _standardize_input_schema(df)
     return df
 
 
@@ -73,7 +124,7 @@ def filter_wg_listings(df: pd.DataFrame) -> pd.DataFrame:
     text = (
         df["title"].fillna("").str.lower()
         + " "
-        + df.get("description", pd.Series([""] * len(df))).fillna("").str.lower()
+        + df.get("description", pd.Series([""] * len(df), index=df.index)).fillna("").str.lower()
     )
     mask_wg = pd.Series(False, index=df.index)
     for kw in WG_KEYWORDS:
@@ -159,7 +210,7 @@ def extract_furnished(df: pd.DataFrame) -> pd.DataFrame:
     text = (
         df["title"].fillna("").str.lower()
         + " "
-        + df.get("description", pd.Series([""] * len(df))).fillna("").str.lower()
+        + df.get("description", pd.Series([""] * len(df), index=df.index)).fillna("").str.lower()
     )
     mask = pd.Series(False, index=df.index)
     for kw in FURNISHED_KEYWORDS:
@@ -184,7 +235,7 @@ def extract_parking(df: pd.DataFrame) -> pd.DataFrame:
     text = (
         df["title"].fillna("").str.lower()
         + " "
-        + df.get("description", pd.Series([""] * len(df))).fillna("").str.lower()
+        + df.get("description", pd.Series([""] * len(df), index=df.index)).fillna("").str.lower()
     )
     mask = pd.Series(False, index=df.index)
     for kw in PARKING_KEYWORDS:
@@ -231,7 +282,7 @@ def remove_outliers(df: pd.DataFrame, iqr_multiplier: float = 2.0) -> pd.DataFra
 # ── Full pipeline ─────────────────────────────────────────────────────────────
 
 def run_preprocessing_pipeline(
-    raw_path: Path = RAW_DATA_PATH,
+    raw_path: Path = INPUT_DATA_PATH,
     clean_path: Path = CLEAN_DATA_PATH,
     save: bool = True,
 ) -> pd.DataFrame:
