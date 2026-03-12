@@ -1,4 +1,13 @@
 streamlit
-scikit-learn
 pandas
 numpy
+scikit-learn
+jupyter
+matplotlib
+seaborn
+plotly
+geopy
+requests
+beautifulsoup4
+lxml
+openpyxl
